@@ -1,54 +1,35 @@
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
 
 function App() {
-  const [task, setTask] = useState('');
   const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const addTask = () => {
-    if (task.trim() === '') return;
-    setTodos([...todos, { text: task, done: false }]);
-    setTask('');
-  };
+  // Fetch todos when the component loads
+  useEffect(() => {
+    const fetchTodos = async () => {
+      const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+      const data = await response.json();
+      setTodos(data);
+      setLoading(false);  // Set loading to false after data is fetched
+    };
 
-  const toggleDone = (index) => {
-    const copy = [...todos];
-    copy[index].done = !copy[index].done;
-    setTodos(copy);
-  };
+    fetchTodos();
+  }, []);
 
   return (
-    <div className="app">
-       <h2>My To-Do list</h2>
-      <div className="input-row">
-        <input
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          placeholder="Type a task"
-        />
-        <button onClick={addTask}>Add</button>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Task</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {todos.map((todo, i) => (
-            <tr key={i} onClick={() => toggleDone(i)}>
-              <td>{i + 1}</td>
-              <td style={{ textDecoration: todo.done ? 'line-through' : 'none' }}>
-                {todo.text}
-              </td>
-              <td>{todo.done ? 'Done' : 'Not done'}</td>
-            </tr>
+    <div>
+      <h1>Todo List</h1>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <ul>
+          {todos.map(todo => (
+            <li key={todo.id}>
+              <strong>{todo.title}</strong> - {todo.completed ? 'Completed' : 'Not Completed'}
+            </li>
           ))}
-        </tbody>
-      </table>
+        </ul>
+      )}
     </div>
   );
 }
